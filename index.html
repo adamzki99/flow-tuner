@@ -1,3 +1,481 @@
-<h1>Flow-tuner</h1>
+<!DOCTYPE html>
+<html lang="en">
 
-<p>This is the main page for the flow tuner calibration utility</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Regression Calculator - SUN Microsystems</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lucida Console', 'Monaco', 'Courier New', monospace;
+            margin: 0;
+            padding: 16px;
+            background: #c0c0c0;
+            color: #000000;
+            line-height: 1.4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #e0e0e0;
+            border: 2px outset #c0c0c0;
+            box-shadow: 2px 2px 4px #808080;
+            padding: clamp(16px, 4vw, 24px);
+            width: fit-content;
+            min-width: 300px;
+        }
+
+        h1 {
+            color: #000080;
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: clamp(16px, 4vw, 18px);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        p {
+            margin: 12px 0;
+            color: #000000;
+            font-size: clamp(11px, 2.5vw, 12px);
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .predict-input {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #d0d0d0;
+            border: 1px inset #c0c0c0;
+        }
+
+        @media (min-width: 480px) {
+            .input-group {
+                flex-direction: row;
+                align-items: flex-end;
+                gap: 8px;
+            }
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 2px;
+            font-weight: bold;
+            color: #000000;
+            font-size: clamp(10px, 2.2vw, 11px);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: clamp(8px, 2vw, 12px);
+            border: 2px inset #c0c0c0;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-family: 'Lucida Console', 'Monaco', 'Courier New', monospace;
+            background: #ffffff;
+            color: #000000;
+            min-height: 32px;
+        }
+
+        /* Touch devices get larger inputs */
+        @media (hover: none) and (pointer: coarse) {
+            input[type="number"] {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+        }
+
+        input[type="number"]:focus {
+            outline: 1px dotted #000080;
+            outline-offset: -2px;
+        }
+
+        .remove-btn {
+            background: #c0c0c0;
+            color: #000000;
+            border: 2px outset #c0c0c0;
+            padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+            cursor: pointer;
+            font-size: clamp(9px, 2vw, 10px);
+            font-weight: bold;
+            font-family: 'Lucida Console', 'Monaco', 'Courier New', monospace;
+            min-width: 70px;
+            min-height: 32px;
+            margin-top: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .remove-btn {
+                margin-top: 0;
+                flex-shrink: 0;
+            }
+        }
+
+        /* Touch devices get larger buttons */
+        @media (hover: none) and (pointer: coarse) {
+            .remove-btn {
+                min-height: 44px;
+                padding: 12px 16px;
+                font-size: 12px;
+            }
+        }
+
+        .remove-btn:hover {
+            background: #a0a0a0;
+        }
+
+        .remove-btn:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 480px) {
+            .controls {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        button {
+            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+            border: 2px outset #c0c0c0;
+            cursor: pointer;
+            font-size: clamp(10px, 2.2vw, 11px);
+            font-weight: bold;
+            font-family: 'Lucida Console', 'Monaco', 'Courier New', monospace;
+            background: #c0c0c0;
+            color: #000000;
+            min-height: 32px;
+        }
+
+        /* Touch devices get larger buttons */
+        @media (hover: none) and (pointer: coarse) {
+            button {
+                min-height: 44px;
+                padding: 12px 20px;
+                font-size: 12px;
+            }
+        }
+
+        button:hover {
+            background: #a0a0a0;
+        }
+
+        button:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        #result {
+            margin-top: 16px;
+            padding: clamp(12px, 3vw, 16px);
+            background: #ffffff;
+            border: 2px inset #c0c0c0;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: bold;
+            color: #000000;
+            text-align: left;
+            display: none;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .error-result {
+            background: #ffcccc !important;
+            border: 2px inset #ff8080 !important;
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 1px solid #808080;
+            margin: 16px 0;
+            height: 1px;
+        }
+
+        /* Footer styles */
+        .footer {
+            margin-top: auto;
+            padding: 16px;
+            text-align: center;
+            background: #d0d0d0;
+            border: 1px inset #c0c0c0;
+            font-size: clamp(9px, 2vw, 10px);
+            color: #000000;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+            min-width: 300px;
+        }
+
+        .footer a {
+            color: #000080;
+            text-decoration: underline;
+        }
+
+        .footer a:hover {
+            color: #0000ff;
+        }
+
+        /* High DPI display adjustments */
+        @media (-webkit-min-device-pixel-ratio: 2),
+        (min-resolution: 192dpi) {
+            .container {
+                border-width: 1px;
+            }
+
+            input[type="number"],
+            button,
+            .remove-btn {
+                border-width: 1px;
+            }
+        }
+
+        /* Landscape phone optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                padding: 12px;
+            }
+
+            h1 {
+                margin-bottom: 12px;
+            }
+
+            p {
+                margin: 8px 0;
+            }
+        }
+
+        /* Large desktop optimization */
+        @media (min-width: 1200px) {
+            body {
+                padding: 40px;
+            }
+
+            .container {
+                padding: 32px;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .container {
+                border: 1px solid black;
+                box-shadow: none;
+                background: white;
+            }
+
+            button,
+            .remove-btn {
+                display: none;
+            }
+
+            .footer {
+                border: 1px solid black;
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-content">
+        <div class="container">
+            <h1>Flow Ratio Tuning Tool</h1>
+            <div class="predict-input">
+                <p>Enter the nozzle size which you are calibrating for:</p>
+                <div class="input-field">
+                    <label for="predict-x">Nozzle size (in mm)</label>
+                    <input type="number" id="predict-x" value="0.4" step="0.1" placeholder="Enter x value to predict">
+                </div>
+            </div>
+            <div class="input-section">
+                <p>Enter your data points below. With one point, simple calculation is used. With two or more points,
+                    linear regression is performed:</p>
+                <div id="points-container">
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>Measured wall thickness (mm)</label>
+                            <input type="number" class="x-input" step="0.05" placeholder="e.g., 0.42">
+                        </div>
+                        <div class="input-field">
+                            <label>Flow ratio (%)</label>
+                            <input type="number" class="y-input" step="0.05" placeholder="e.g., 102.1">
+                        </div>
+                        <button class="remove-btn" onclick="removePoint(this)">Remove</button>
+                    </div>
+                </div>
+                <button id="addPoint">Add Point</button>
+            </div>
+            <hr class="section-divider">
+            <div class="controls">
+                <button id="calculate">Calculate</button>
+            </div>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Created by <strong>Adam Svensson</strong> |
+        <a href="mailto:therealadamzki@gmail.com">therealadamzki@gmail.com</a> |
+        Licensed under MIT License
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addPointBtn = document.getElementById('addPoint');
+            const calculateBtn = document.getElementById('calculate');
+            const pointsContainer = document.getElementById('points-container');
+            const resultDiv = document.getElementById('result');
+            let pointCount = 1;
+            // Function to remove a data point
+            window.removePoint = function (button) {
+                const pointGroup = button.parentElement;
+                const container = pointGroup.parentElement;
+                const totalPoints = container.querySelectorAll('.input-group').length;
+                if (totalPoints > 1) {
+                    pointGroup.remove();
+                    pointCount--;
+                } else {
+                    alert('You must have at least 1 data point for calculation.');
+                }
+            };
+            // Add a new row for data input
+            addPointBtn.addEventListener('click', function () {
+                pointCount++;
+                const newPointGroup = document.createElement('div');
+                newPointGroup.className = 'input-group';
+                newPointGroup.innerHTML = `
+                    <div class="input-field">
+                        <label>Measured wall thickness (mm)</label>
+                        <input type="number" class="x-input" step="0.05">
+                    </div>
+                    <div class="input-field">
+                        <label>Flow setting (%)</label>
+                        <input type="number" class="y-input" step="0.05">
+                    </div>
+                    <button class="remove-btn" onclick="removePoint(this)">Remove</button>
+                `;
+                pointsContainer.appendChild(newPointGroup);
+            });
+            // Perform calculation (simple or regression based on data points)
+            calculateBtn.addEventListener('click', function () {
+                const xInputs = document.querySelectorAll('.x-input');
+                const yInputs = document.querySelectorAll('.y-input');
+                const predictXInput = document.getElementById('predict-x');
+                const points = [];
+                // Collect and validate data points
+                for (let i = 0; i < xInputs.length; i++) {
+                    const x = parseFloat(xInputs[i].value);
+                    const y = parseFloat(yInputs[i].value);
+                    if (!isNaN(x) && !isNaN(y)) {
+                        points.push({ x, y });
+                    }
+                }
+                const xToPredict = parseFloat(predictXInput.value);
+                // Validation
+                if (isNaN(xToPredict)) {
+                    resultDiv.innerHTML = `Error: Please enter a valid 'Nozzle size' to predict.`;
+                    resultDiv.className = 'error-result';
+                    resultDiv.style.display = 'block';
+                    return;
+                }
+                if (points.length < 1) {
+                    resultDiv.innerHTML = 'Error: Please provide at least one valid data point.';
+                    resultDiv.className = 'error-result';
+                    resultDiv.style.display = 'block';
+                    return;
+                }
+                let yPredicted;
+                let calculationMethod;
+                let formulaDetails;
+                if (points.length === 1) {
+                    // Simple calculation for single data point
+                    const measuredX = points[0].x;
+                    const measuredY = points[0].y;
+                    if (measuredX === 0) {
+                        resultDiv.innerHTML = `Error: Measured nozzle size cannot be zero (division by zero).`;
+                        resultDiv.className = 'error-result';
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+                    // Simple division calculation: (nozzle_size / measured_value_of_x) * provided_value_of_y
+                    yPredicted = (xToPredict / measuredX) * measuredY;
+                } else {
+                    // Linear Regression for multiple data points (y = mx + b)
+                    const n = points.length;
+                    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                    for (const p of points) {
+                        sumX += p.x;
+                        sumY += p.y;
+                        sumXY += p.x * p.y;
+                        sumX2 += p.x * p.x;
+                    }
+                    const m_denominator = (n * sumX2) - (sumX * sumX);
+                    if (m_denominator === 0) {
+                        resultDiv.innerHTML = 'Error: Cannot perform regression (division by zero). The x-values might be identical.';
+                        resultDiv.className = 'error-result';
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+                    const m = ((n * sumXY) - (sumX * sumY)) / m_denominator;
+                    const b = (sumY - m * sumX) / n;
+                    // Predict y for the user-defined x
+                    yPredicted = m * xToPredict + b;
+                }
+                // Display the result
+                resultDiv.innerHTML = `<strong>Result:</strong><br>For a nozzle size of <i>${xToPredict} mm</i>, the predicted Flow is <i>${yPredicted.toFixed(2)} %</i>`;
+                resultDiv.className = '';
+                resultDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+
+</html>
