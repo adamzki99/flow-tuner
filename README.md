@@ -2,6 +2,7 @@
 
 A simple, browser-based utility for 3D printing flow calibration.
 
+Currently hosted on Github Pages: [Flow-Tuner](https://adamzki99.github.io/flow-tuner/)
 
 This tool is used to tune the correct flow ratio (%) for any nozzle size based on your measured wall-thickness test results. 
 It supports both single-point calculation and multi-point linear regression for more accurate tuning.
